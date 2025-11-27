@@ -5,8 +5,7 @@
   "private": true,
   "scripts": {
     "start": "expo start",
-    "ios": "expo run:ios",
-    "android": "expo run:android"
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "expo": "~54.0.12",
