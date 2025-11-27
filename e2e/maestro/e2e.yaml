@@ -1,0 +1,29 @@
+appId: com.hortemo.expoPhotosE2E
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "run-tests"
+- assertVisible:
+    id: "test-progress-request-permission"
+- assertVisible:
+    id: "test-progress-authorization-status"
+- assertVisible:
+    id: "test-progress-fetch-images"
+- assertVisible:
+    id: "test-progress-image-count"
+- assertVisible:
+    id: "test-progress-export-image"
+- assertVisible:
+    id: "test-progress-image-exported"
+- assertVisible:
+    id: "test-progress-fetch-videos"
+- assertVisible:
+    id: "test-progress-video-count"
+- assertVisible:
+    id: "test-progress-export-video"
+- assertVisible:
+    id: "test-progress-video-exported"
+- assertVisible:
+    id: "test-status"
+    text: "Status: success"

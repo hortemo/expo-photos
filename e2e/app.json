@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "expo-photos-e2e",
+    "slug": "expo-photos-e2e",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "bundleIdentifier": "com.hortemo.expoPhotosE2E",
+      "buildNumber": "1.0.0",
+      "projectName": "ExpoPhotosE2E",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow ExpoPhotos to read your photo library for automated testing."
+      }
+    }
+  }
+}

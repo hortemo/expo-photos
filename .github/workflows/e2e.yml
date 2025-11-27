@@ -1,0 +1,39 @@
+name: iOS E2E
+
+on:
+  pull_request:
+
+jobs:
+  ios-e2e:
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      CI: true
+      EXPO_NO_TELEMETRY: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Maestro CLI
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Run iOS build and Maestro flow
+        run: ./e2e/e2e.sh
+
+      - name: Upload Xcode build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: e2e/build/xcodebuild.log
+          if-no-files-found: warn
+
+      - name: Upload simulator recording
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulator-video
+          path: e2e/maestro/e2e-recording.mp4
+          if-no-files-found: warn
