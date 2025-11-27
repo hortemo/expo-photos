@@ -1,6 +1,6 @@
 # @hortemo/expo-photos
 
-Lightweight wrapper for iOS PhotoKit helpers.
+Lightweight Expo (React Native) wrapper for Apple's [Photos](https://developer.apple.com/documentation/photos) framework.
 
 ## Installation
 
