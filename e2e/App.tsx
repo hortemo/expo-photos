@@ -1,5 +1,12 @@
 import React, { JSX, useCallback, useState } from "react";
-import { Button, SafeAreaView, ScrollView, Text, View } from "react-native";
+import {
+  Button,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import * as FileSystem from "expo-file-system";
 import ExpoPhotos, {
   AVAssetExportPreset,
@@ -9,6 +16,8 @@ import ExpoPhotos, {
   PHAuthorizationStatus,
   PHImageContentMode,
   PHImageRequestOptionsDeliveryMode,
+  PHImageRequestOptionsResizeMode,
+  createPHImageSource,
 } from "@hortemo/expo-photos";
 
 type TestState = "idle" | "running" | "success" | "error";
@@ -38,6 +47,7 @@ function ensureWritableFile(filename: string): FileSystem.File {
 
 function App(): JSX.Element {
   const [status, setStatus] = useState<TestStatus>(startStatus);
+  const [imageAssetId, setImageAssetId] = useState<string | null>(null);
 
   const logProgress = useCallback((id: string, message: string) => {
     console.log(message);
@@ -49,9 +59,13 @@ function App(): JSX.Element {
 
   const runTests = useCallback(async () => {
     setStatus({ state: "running", error: null, progress: [] });
+    setImageAssetId(null);
 
     try {
-      logProgress("request-permission", "Requesting photo library permission...");
+      logProgress(
+        "request-permission",
+        "Requesting photo library permission..."
+      );
       const status = await ExpoPhotos.requestAuthorization(
         PHAccessLevel.readWrite
       );
@@ -77,16 +91,14 @@ function App(): JSX.Element {
       if (!imageAsset) {
         throw new Error("No image assets available in the photo library");
       }
+      setImageAssetId(imageAsset.localIdentifier);
 
       const imageOutput = ensureWritableFile("expo-photos-e2e.webp");
       if (imageOutput.exists) {
         imageOutput.delete();
       }
 
-      logProgress(
-        "export-image",
-        `Exporting image to ${imageOutput.uri}...`
-      );
+      logProgress("export-image", `Exporting image to ${imageOutput.uri}...`);
       await ExpoPhotos.requestImage({
         localIdentifier: imageAsset.localIdentifier,
         targetSize: { width: 512, height: 512 },
@@ -186,6 +198,29 @@ function App(): JSX.Element {
               </Text>
             ))}
           </View>
+        </View>
+
+        <View style={{ gap: 8 }}>
+          <Text style={{ fontWeight: "600" }}>Image preview</Text>
+          {imageAssetId ? (
+            <Image
+              testID="ph-image-preview"
+              style={{ width: 400, height: 200, backgroundColor: "green" }}
+              resizeMode="contain"
+              source={createPHImageSource({
+                localIdentifier: imageAssetId,
+                targetSize: { width: 4000, height: 2000 },
+                resizeMode: PHImageRequestOptionsResizeMode.Fast,
+                contentMode: PHImageContentMode.aspectFill,
+                deliveryMode:
+                  PHImageRequestOptionsDeliveryMode.HighQualityFormat,
+              })}
+            />
+          ) : (
+            <Text style={{ color: "#666" }}>
+              Run tests to load an image preview.
+            </Text>
+          )}
         </View>
 
         <Button

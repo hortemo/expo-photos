@@ -5,9 +5,11 @@
   "private": true,
   "scripts": {
     "start": "expo start",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "android": "expo run:android"
   },
   "dependencies": {
+    "@hortemo/expo-photos": "file:..",
     "expo": "~54.0.12",
     "react": "19.1.0",
     "react-native": "0.81.4"
