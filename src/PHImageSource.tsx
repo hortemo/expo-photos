@@ -1,14 +1,14 @@
 import type { ImageSourcePropType } from "react-native";
 import {
-  CGSize,
   PHImageContentMode,
   PHImageRequestOptionsDeliveryMode,
   PHImageRequestOptionsResizeMode,
+  RequestImageTargetSize,
 } from "./ExpoPhotos.types";
 
 export interface PHImageSourceOptions {
   localIdentifier: string;
-  targetSize?: CGSize;
+  targetSize?: RequestImageTargetSize;
   resizeMode?: PHImageRequestOptionsResizeMode;
   deliveryMode?: PHImageRequestOptionsDeliveryMode;
   contentMode?: PHImageContentMode;
@@ -16,7 +16,7 @@ export interface PHImageSourceOptions {
 }
 
 const buildQueryString = (
-  params: Record<string, string | undefined>
+  params: Record<string, string | number | boolean | undefined>
 ): string => {
   const entries = Object.entries(params).filter(
     ([, value]) => value !== undefined
@@ -59,32 +59,27 @@ const buildQueryString = (
  */
 export function createPHImageSource(
   options: PHImageSourceOptions
-): ImageSourcePropType | undefined {
-  const { localIdentifier } = options;
-
-  if (!localIdentifier) {
-    return undefined;
-  }
-
+): ImageSourcePropType {
   const {
-    targetSize,
+    localIdentifier,
     resizeMode,
     deliveryMode,
     contentMode,
     isNetworkAccessAllowed,
   } = options;
 
-  const targetSizeValue = targetSize
-    ? `${targetSize.width}x${targetSize.height}`
-    : undefined;
+  const targetSize =
+    options.targetSize && typeof options.targetSize === "object"
+      ? `${options.targetSize.width}x${options.targetSize.height}`
+      : options.targetSize;
 
   const query = buildQueryString({
     localIdentifier,
-    targetSize: targetSizeValue,
-    resizeMode: resizeMode?.toString(),
-    deliveryMode: deliveryMode?.toString(),
-    contentMode: contentMode?.toString(),
-    isNetworkAccessAllowed: isNetworkAccessAllowed?.toString(),
+    targetSize,
+    resizeMode,
+    deliveryMode,
+    contentMode,
+    isNetworkAccessAllowed,
   });
 
   return { uri: `expo-photos://${query}` };

@@ -74,14 +74,18 @@ class ExpoPhotosImageLoader: NSObject, RCTBridgeModule, RCTImageURLLoader {
     var targetSize = size.applying(CGAffineTransform(scaleX: scale, y: scale))
 
     if let targetSizeString = queryParams["targetSize"] {
-      let components = targetSizeString.lowercased().components(separatedBy: "x")
-      guard components.count == 2,
-            let width = Double(components[0]),
-            let height = Double(components[1]) else {
-        completionHandler(RCTErrorWithMessage("Invalid targetSize format. Expected WIDTHxHEIGHT."), nil)
-        return {}
+      if targetSizeString.caseInsensitiveCompare("PHImageManagerMaximumSize") == .orderedSame {
+        targetSize = PHImageManagerMaximumSize
+      } else {
+        let components = targetSizeString.lowercased().components(separatedBy: "x")
+        guard components.count == 2,
+              let width = Double(components[0]),
+              let height = Double(components[1]) else {
+          completionHandler(RCTErrorWithMessage("Invalid targetSize format. Expected WIDTHxHEIGHT or PHImageManagerMaximumSize."), nil)
+          return {}
+        }
+        targetSize = CGSize(width: width, height: height)
       }
-      targetSize = CGSize(width: width, height: height)
     }
 
     if let deliveryModeString = queryParams["deliveryMode"] {
