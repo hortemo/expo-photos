@@ -1,7 +1,6 @@
 {
   "platforms": ["apple"],
   "apple": {
-    "modules": ["ExpoPhotos"],
-    "podspecPath": "ExpoPhotos.podspec"
+    "modules": ["ExpoPhotos"]
   }
 }

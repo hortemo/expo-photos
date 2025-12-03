@@ -1,10 +1,6 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true,
-    "paths": {
-      "@hortemo/expo-photos": ["../src/index"],
-      "@hortemo/expo-photos/*": ["../src/*"]
-    }
+    "strict": true
   }
 }
