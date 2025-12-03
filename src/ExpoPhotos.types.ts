@@ -4,6 +4,8 @@ export interface PHAsset {
   mediaType: PHAssetMediaType;
   mediaSubtypes: PHAssetMediaSubtype;
   duration: number;
+  pixelWidth: number;
+  pixelHeight: number;
 }
 
 export enum PHAuthorizationStatus {
