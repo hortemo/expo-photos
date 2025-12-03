@@ -31,29 +31,6 @@ class ExpoPhotosImageLoader: NSObject, RCTBridgeModule, RCTImageURLLoader {
     return result
   }
 
-  private static let numberFormatter: NumberFormatter = {
-    let formatter = NumberFormatter()
-    formatter.locale = Locale(identifier: "en_US_POSIX")
-    formatter.numberStyle = .decimal
-    return formatter
-  }()
-
-  private static func number(from string: String?) -> NSNumber? {
-    guard let string = string else {
-      return nil
-    }
-    return numberFormatter.number(from: string)
-  }
-
-  private static func bool(from string: String?) -> Bool {
-    guard let string = string else {
-      return false
-    }
-
-    let lower = string.lowercased()
-    return lower == "1" || lower == "true" || lower == "yes"
-  }
-
   // MARK: - RCTImageURLLoader
 
   func canLoadImageURL(_ requestURL: URL) -> Bool {
@@ -81,61 +58,55 @@ class ExpoPhotosImageLoader: NSObject, RCTBridgeModule, RCTImageURLLoader {
 
     let queryParams = Self.queryItems(from: imageURL)
 
-    // Using PhotoKit for iOS 8+
-    guard let assetID = queryParams["localIdentifier"], !assetID.isEmpty else {
+    guard let localIdentifier = queryParams["localIdentifier"], !localIdentifier.isEmpty else {
       completionHandler(RCTErrorWithMessage("Missing localIdentifier query parameter"), nil)
       return {}
     }
 
-    let results = PHAsset.fetchAssets(withLocalIdentifiers: [assetID], options: nil)
-    guard results.count > 0 else {
-      let errorText = "Failed to fetch PHAsset with local identifier \(assetID) with no error message."
-      completionHandler(RCTErrorWithMessage(errorText), nil)
+    let assets = PHAsset.fetchAssets(withLocalIdentifiers: [localIdentifier], options: nil)
+    guard let asset = assets.firstObject else {
+      completionHandler(RCTErrorWithMessage("Failed to fetch PHAsset with local identifier \(localIdentifier)"), nil)
       return {}
     }
 
-    let asset = results.firstObject!
     let imageOptions = PHImageRequestOptions()
 
     var targetSize = size.applying(CGAffineTransform(scaleX: scale, y: scale))
 
-    if let targetSizeString = queryParams["targetSize"], !targetSizeString.isEmpty {
+    if let targetSizeString = queryParams["targetSize"] {
       let components = targetSizeString.lowercased().components(separatedBy: "x")
       guard components.count == 2,
-            let width = Self.number(from: components[0]),
-            let height = Self.number(from: components[1]) else {
+            let width = Double(components[0]),
+            let height = Double(components[1]) else {
         completionHandler(RCTErrorWithMessage("Invalid targetSize format. Expected WIDTHxHEIGHT."), nil)
         return {}
       }
-      targetSize = CGSize(width: width.doubleValue, height: height.doubleValue)
+      targetSize = CGSize(width: width, height: height)
     }
 
-    if let deliveryModeString = queryParams["deliveryMode"], !deliveryModeString.isEmpty {
-      guard let deliveryModeNumber = Self.number(from: deliveryModeString),
-            let deliveryMode = PHImageRequestOptionsDeliveryMode(rawValue: deliveryModeNumber.intValue) else {
+    if let deliveryModeString = queryParams["deliveryMode"] {
+      guard let deliveryMode = PHImageRequestOptionsDeliveryMode.from(queryParam: deliveryModeString) else {
         completionHandler(RCTErrorWithMessage("Invalid deliveryMode value."), nil)
         return {}
       }
       imageOptions.deliveryMode = deliveryMode
     }
 
-    if let resizeModeString = queryParams["resizeMode"], !resizeModeString.isEmpty {
-      guard let resizeModeNumber = Self.number(from: resizeModeString),
-            let resizeMode = PHImageRequestOptionsResizeMode(rawValue: resizeModeNumber.intValue) else {
+    if let resizeModeString = queryParams["resizeMode"] {
+      guard let resizeMode = PHImageRequestOptionsResizeMode.from(queryParam: resizeModeString) else {
         completionHandler(RCTErrorWithMessage("Invalid resizeMode value."), nil)
         return {}
       }
       imageOptions.resizeMode = resizeMode
     }
 
-    if let isNetworkAccessAllowedString = queryParams["isNetworkAccessAllowed"], !isNetworkAccessAllowedString.isEmpty {
-      imageOptions.isNetworkAccessAllowed = Self.bool(from: isNetworkAccessAllowedString)
+    if let isNetworkAccessAllowedString = queryParams["isNetworkAccessAllowed"] {
+      imageOptions.isNetworkAccessAllowed = Bool.from(queryParam: isNetworkAccessAllowedString)
     }
 
     var contentMode: PHImageContentMode = .default
-    if let contentModeString = queryParams["contentMode"], !contentModeString.isEmpty {
-      guard let contentModeNumber = Self.number(from: contentModeString),
-            let _contentMode = PHImageContentMode(rawValue: contentModeNumber.intValue) else {
+    if let contentModeString = queryParams["contentMode"] {
+      guard let _contentMode = PHImageContentMode.from(queryParam: contentModeString) else {
         completionHandler(RCTErrorWithMessage("Invalid contentMode value."), nil)
         return {}
       }
@@ -180,6 +151,31 @@ class ExpoPhotosImageLoader: NSObject, RCTBridgeModule, RCTImageURLLoader {
     return {
       PHImageManager.default().cancelImageRequest(requestID)
     }
+  }
+}
+
+// MARK: - RawRepresentable Extension
+
+extension RawRepresentable where RawValue == Int {
+  static func from(queryParam string: String?) -> Self? {
+    guard let string = string, !string.isEmpty else {
+      return nil
+    }
+    guard let intValue = Int(string) else {
+      return nil
+    }
+    return Self(rawValue: intValue)
+  }
+}
+
+// MARK: - Bool Extension
+
+extension Bool {
+  static func from(queryParam string: String?) -> Bool {
+    guard let string = string, !string.isEmpty else {
+      return false
+    }
+    return string.lowercased() == "true"
   }
 }
 
