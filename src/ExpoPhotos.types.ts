@@ -57,6 +57,10 @@ export interface CGSize {
   height: number;
 }
 
+export type PHImageManagerMaximumSize = "PHImageManagerMaximumSize";
+
+export type RequestImageTargetSize = CGSize | PHImageManagerMaximumSize;
+
 export enum PHImageRequestOptionsResizeMode {
   None = 0,
   Fast = 1,
@@ -171,10 +175,16 @@ export interface RequestImageOptions
   extends PHImageRequestOptions,
     SDImageCoderOptions {
   localIdentifier: string;
-  targetSize: CGSize;
+  targetSize: RequestImageTargetSize;
   contentMode: PHImageContentMode;
-  outputURL: string;
+  outputURL?: string;
   timeout?: number;
+}
+
+export interface RequestImageResult {
+  size: CGSize;
+  scale: number;
+  imageOrientation: number;
 }
 
 export interface RequestVideoOptions

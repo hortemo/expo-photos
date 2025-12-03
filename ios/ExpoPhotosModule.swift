@@ -13,7 +13,7 @@ struct FetchAssetsOptions: Record {
 
 struct RequestImageOptions: Record {
   @Field var localIdentifier: String?
-  @Field var targetSize: CGSize?
+  @Field var targetSize: TargetSize?
   @Field var contentMode: PHImageContentMode?
   @Field var isNetworkAccessAllowed: Bool?
   @Field var deliveryMode: PHImageRequestOptionsDeliveryMode?
@@ -92,12 +92,11 @@ public class ExpoPhotos: Module {
       return status.rawValue
     }
 
-    AsyncFunction("requestImage") { (options: RequestImageOptions) async throws -> Void in
+    AsyncFunction("requestImage") { (options: RequestImageOptions) async throws -> [String: Any] in
       guard
         let localIdentifier = options.localIdentifier,
-        let targetSize = options.targetSize,
-        let contentMode = options.contentMode,
-        let outputURL = options.outputURL
+        let targetSize = options.targetSize?.value,
+        let contentMode = options.contentMode
       else {
         throw ExpoPhotosError.mandatoryFieldMissing
       }
@@ -145,24 +144,35 @@ public class ExpoPhotos: Module {
         }
       }
 
-      var imageCoderOptions: [SDImageCoderOption: Any] = [:]
+      if let outputURL = options.outputURL {
+        var imageCoderOptions: [SDImageCoderOption: Any] = [:]
 
-      if let encodeCompressionQuality = options.encodeCompressionQuality {
-        imageCoderOptions[.encodeCompressionQuality] = encodeCompressionQuality
+        if let encodeCompressionQuality = options.encodeCompressionQuality {
+          imageCoderOptions[.encodeCompressionQuality] = encodeCompressionQuality
+        }
+
+        if let encodeMaxFileSize = options.encodeMaxFileSize {
+          imageCoderOptions[.encodeMaxFileSize] = encodeMaxFileSize
+        }
+
+        guard
+          let data = SDImageWebPCoder.shared.encodedData(
+            with: image, format: .webP, options: imageCoderOptions)
+        else {
+          throw ExpoPhotosError.couldNotEncodeImage
+        }
+
+        try data.write(to: outputURL)
       }
 
-      if let encodeMaxFileSize = options.encodeMaxFileSize {
-        imageCoderOptions[.encodeMaxFileSize] = encodeMaxFileSize
-      }
-
-      guard
-        let data = SDImageWebPCoder.shared.encodedData(
-          with: image, format: .webP, options: imageCoderOptions)
-      else {
-        throw ExpoPhotosError.couldNotEncodeImage
-      }
-
-      try data.write(to: outputURL)
+      return [
+        "size": [
+          "width": image.size.width,
+          "height": image.size.height,
+        ],
+        "scale": image.scale,
+        "imageOrientation": image.imageOrientation.rawValue,
+      ]
     }
 
     AsyncFunction("requestVideo") { (options: RequestVideoOptions) async throws -> Void in
@@ -390,6 +400,19 @@ extension CMTimeRange: @retroactive Convertible {
       start: CMTimeMakeWithSeconds(Double(startMs) / 1000, preferredTimescale: 600),
       duration: CMTimeMakeWithSeconds(Double(durationMs) / 1000, preferredTimescale: 600)
     )
+  }
+}
+
+struct TargetSize: Convertible {
+  let value: CGSize
+
+  static func convert(from value: Any?, appContext: AppContext) throws -> TargetSize {
+    if let sentinel = value as? String, sentinel == "PHImageManagerMaximumSize" {
+      return TargetSize(value: PHImageManagerMaximumSize)
+    }
+
+    let size = try CGSize.convert(from: value, appContext: appContext)
+    return TargetSize(value: size)
   }
 }
 
