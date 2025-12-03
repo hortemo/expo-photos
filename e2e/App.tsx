@@ -99,7 +99,7 @@ function App(): JSX.Element {
       }
 
       logProgress("export-image", `Exporting image to ${imageOutput.uri}...`);
-      await ExpoPhotos.requestImage({
+      const imageResult = await ExpoPhotos.requestImage({
         localIdentifier: imageAsset.localIdentifier,
         targetSize: { width: 512, height: 512 },
         contentMode: PHImageContentMode.aspectFit,
@@ -108,6 +108,11 @@ function App(): JSX.Element {
         outputURL: imageOutput.uri,
       });
 
+      logProgress(
+        "image-metadata",
+        `Image metadata: size=${imageResult.size.width}x${imageResult.size.height}, scale=${imageResult.scale}, orientation=${imageResult.imageOrientation}`
+      );
+
       const imageInfo = imageOutput.info();
       if (!imageInfo.exists || (imageInfo.size ?? 0) === 0) {
         throw new Error("Image export failed (file missing or empty)");
@@ -115,6 +120,21 @@ function App(): JSX.Element {
       logProgress(
         "image-exported",
         `Image exported (${Math.round((imageInfo.size ?? 0) / 1024)} KB).`
+      );
+
+      logProgress(
+        "test-max-size",
+        "Testing requestImage with PHImageManagerMaximumSize..."
+      );
+      const maxSizeResult = await ExpoPhotos.requestImage({
+        localIdentifier: imageAsset.localIdentifier,
+        targetSize: "PHImageManagerMaximumSize",
+        contentMode: PHImageContentMode.aspectFit,
+        deliveryMode: PHImageRequestOptionsDeliveryMode.HighQualityFormat,
+      });
+      logProgress(
+        "max-size-metadata",
+        `Max size metadata: size=${maxSizeResult.size.width}x${maxSizeResult.size.height}, scale=${maxSizeResult.scale}`
       );
 
       logProgress("fetch-videos", "Fetching video assets from Photos...");

@@ -7,11 +7,12 @@ import type {
   PickAssetsOptions,
   RequestImageOptions,
   RequestVideoOptions,
+  RequestImageResult,
 } from "./ExpoPhotos.types";
 
 export declare class ExpoPhotosModule extends NativeModule {
   fetchAssets(options: FetchAssetsOptions): Promise<PHAsset[]>;
-  requestImage(options: RequestImageOptions): Promise<void>;
+  requestImage(options: RequestImageOptions): Promise<RequestImageResult>;
   requestVideo(options: RequestVideoOptions): Promise<void>;
   pickAssets(options: PickAssetsOptions): Promise<PHAsset[]>;
   requestAuthorization(accessLevel: PHAccessLevel): Promise<PHAuthorizationStatus>;
