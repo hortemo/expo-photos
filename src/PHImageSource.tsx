@@ -68,10 +68,10 @@ export function createPHImageSource(
 
   const {
     targetSize,
-    resizeMode = PHImageRequestOptionsResizeMode.Fast,
-    deliveryMode = PHImageRequestOptionsDeliveryMode.Opportunistic,
-    contentMode = PHImageContentMode.aspectFill,
-    isNetworkAccessAllowed = true,
+    resizeMode,
+    deliveryMode,
+    contentMode,
+    isNetworkAccessAllowed,
   } = options;
 
   const targetSizeValue = targetSize
@@ -81,10 +81,10 @@ export function createPHImageSource(
   const query = buildQueryString({
     localIdentifier,
     targetSize: targetSizeValue,
-    resizeMode: resizeMode.toString(),
-    deliveryMode: deliveryMode.toString(),
-    contentMode: contentMode.toString(),
-    isNetworkAccessAllowed: isNetworkAccessAllowed.toString(),
+    resizeMode: resizeMode?.toString(),
+    deliveryMode: deliveryMode?.toString(),
+    contentMode: contentMode?.toString(),
+    isNetworkAccessAllowed: isNetworkAccessAllowed?.toString(),
   });
 
   return { uri: `expo-photos://${query}` };
