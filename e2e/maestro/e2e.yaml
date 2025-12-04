@@ -7,7 +7,9 @@ appId: com.hortemo.expoPhotosE2E
 - assertVisible:
     id: "test-progress-request-permission"
 - assertVisible:
-    id: "test-progress-authorization-status"
+    id: "test-progress-authorization-status-before"
+- assertVisible:
+    id: "test-progress-authorization-status-after"
 - assertVisible:
     id: "test-progress-fetch-images"
 - assertVisible:

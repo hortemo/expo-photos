@@ -62,6 +62,14 @@ function App(): JSX.Element {
     setImageAssetId(null);
 
     try {
+      const statusBefore = await ExpoPhotos.authorizationStatus(
+        PHAccessLevel.readWrite
+      );
+      logProgress(
+        "authorization-status-before",
+        `Authorization status before request: ${PHAuthorizationStatus[statusBefore]}`
+      );
+
       logProgress(
         "request-permission",
         "Requesting photo library permission..."
@@ -73,8 +81,8 @@ function App(): JSX.Element {
         throw new Error("Photo library access not granted");
       }
       logProgress(
-        "authorization-status",
-        `Authorization status: ${PHAuthorizationStatus[status]}`
+        "authorization-status-after",
+        `Authorization status after request: ${PHAuthorizationStatus[status]}`
       );
 
       logProgress("fetch-images", "Fetching image assets from Photos...");
