@@ -87,6 +87,10 @@ public class ExpoPhotos: Module {
       return assets
     }
 
+    AsyncFunction("authorizationStatus") { (accessLevel: PHAccessLevel) -> Int in
+      return PHPhotoLibrary.authorizationStatus(for: accessLevel).rawValue
+    }
+
     AsyncFunction("requestAuthorization") { (accessLevel: PHAccessLevel) async throws -> Int in
       let status = await PHPhotoLibrary.requestAuthorization(for: accessLevel)
       return status.rawValue
