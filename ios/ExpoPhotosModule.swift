@@ -358,6 +358,8 @@ extension PHAsset {
       "mediaType": mediaType.rawValue,
       "mediaSubtypes": mediaSubtypes.rawValue,
       "duration": duration.toJS(),
+      "pixelWidth": pixelWidth,
+      "pixelHeight": pixelHeight,
     ]
   }
 }
