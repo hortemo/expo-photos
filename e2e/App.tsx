@@ -18,6 +18,7 @@ import ExpoPhotos, {
   PHImageRequestOptionsDeliveryMode,
   PHImageRequestOptionsResizeMode,
   createPHImageSource,
+  PHVideo,
 } from "@hortemo/expo-photos";
 
 type TestState = "idle" | "running" | "success" | "error";
@@ -48,6 +49,7 @@ function ensureWritableFile(filename: string): FileSystem.File {
 function App(): JSX.Element {
   const [status, setStatus] = useState<TestStatus>(startStatus);
   const [imageAssetId, setImageAssetId] = useState<string | null>(null);
+  const [videoAssetId, setVideoAssetId] = useState<string | null>(null);
 
   const logProgress = useCallback((id: string, message: string) => {
     console.log(message);
@@ -60,6 +62,7 @@ function App(): JSX.Element {
   const runTests = useCallback(async () => {
     setStatus({ state: "running", error: null, progress: [] });
     setImageAssetId(null);
+    setVideoAssetId(null);
 
     try {
       const statusBefore = await ExpoPhotos.authorizationStatus(
@@ -159,6 +162,7 @@ function App(): JSX.Element {
       if (!videoAsset) {
         throw new Error("No video assets available in the photo library");
       }
+      setVideoAssetId(videoAsset.localIdentifier);
 
       const videoOutput = ensureWritableFile("expo-photos-e2e.mov");
       if (videoOutput.exists) {
@@ -247,6 +251,34 @@ function App(): JSX.Element {
           ) : (
             <Text style={{ color: "#666" }}>
               Run tests to load an image preview.
+            </Text>
+          )}
+        </View>
+
+        <View style={{ gap: 8 }}>
+          <Text style={{ fontWeight: "600" }}>Video preview</Text>
+          {videoAssetId ? (
+            <View
+              testID="ph-video-preview"
+              style={{ width: 400, height: 300, backgroundColor: "black" }}
+            >
+              <PHVideo
+                localIdentifier={videoAssetId}
+                onLoad={(event) => {
+                  logProgress(
+                    "video-loaded",
+                    `Video loaded: duration=${event.nativeEvent.duration}ms, size=${event.nativeEvent.naturalSize.width}x${event.nativeEvent.naturalSize.height}`
+                  );
+                }}
+                onError={(event) => {
+                  logProgress("video-error", `Video error: ${event.nativeEvent.message}`);
+                }}
+                style={{ width: "100%", height: "100%" }}
+              />
+            </View>
+          ) : (
+            <Text style={{ color: "#666" }}>
+              Run tests to load a video preview.
             </Text>
           )}
         </View>

@@ -1,6 +1,6 @@
 {
   "name": "@hortemo/expo-photos",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "Expo module exposing advanced iOS Photos APIs.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -37,7 +37,6 @@
   },
   "peerDependencies": {
     "expo": "*",
-    "react": "*",
     "react-native": "*"
   },
   "codegenConfig": {
