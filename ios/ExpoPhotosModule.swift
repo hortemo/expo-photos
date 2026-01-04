@@ -57,7 +57,7 @@ enum ExpoPhotosError: Error {
   case unknown
 }
 
-public class ExpoPhotos: Module {
+public final class ExpoPhotos: Module {
   private var pickAssetsContinuations = [
     ObjectIdentifier: CheckedContinuation<[[String: Any]], Error>
   ]()
@@ -300,6 +300,22 @@ public class ExpoPhotos: Module {
           await viewController.present(picker, animated: true, completion: nil)
         }
       }
+    }
+
+    View(PHVideoView.self) {
+      Prop("localIdentifier") { (view: PHVideoView, localIdentifier: String?) in
+        view.localIdentifier = localIdentifier
+      }
+
+      Prop("isNetworkAccessAllowed") { (view: PHVideoView, isNetworkAccessAllowed: Bool?) in
+        view.isNetworkAccessAllowed = isNetworkAccessAllowed ?? true
+      }
+
+      Prop("deliveryMode") { (view: PHVideoView, deliveryMode: PHVideoRequestOptionsDeliveryMode?) in
+        view.deliveryMode = deliveryMode ?? .automatic
+      }
+
+      Events("onLoad", "onError")
     }
   }
 }

@@ -207,3 +207,12 @@ export interface PickAssetsOptions {
   filter?: PHPickerFilter;
   selectionLimit?: number;
 }
+
+export interface PHVideoLoadEvent {
+  duration: number;
+  naturalSize: { width: number; height: number };
+}
+
+export interface PHVideoErrorEvent {
+  message: string;
+}
