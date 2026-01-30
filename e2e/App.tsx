@@ -50,6 +50,7 @@ function App(): JSX.Element {
   const [status, setStatus] = useState<TestStatus>(startStatus);
   const [imageAssetId, setImageAssetId] = useState<string | null>(null);
   const [videoAssetId, setVideoAssetId] = useState<string | null>(null);
+  const [pickAssetsResult, setPickAssetsResult] = useState<string | null>(null);
 
   const logProgress = useCallback((id: string, message: string) => {
     console.log(message);
@@ -205,6 +206,17 @@ function App(): JSX.Element {
     }
   }, [logProgress]);
 
+  const runPickAssets = useCallback(async () => {
+    try {
+      setPickAssetsResult(null);
+      const assets = await ExpoPhotos.pickAssets({ selectionLimit: 1 });
+      setPickAssetsResult(`Picked ${assets.length} asset(s)`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setPickAssetsResult(`Error: ${message}`);
+    }
+  }, []);
+
   const isRunning = status.state === "running";
 
   return (
@@ -289,6 +301,18 @@ function App(): JSX.Element {
           disabled={isRunning}
           testID="run-tests"
         />
+
+        <View style={{ gap: 8 }}>
+          <Button
+            title="Test pickAssets"
+            onPress={runPickAssets}
+            testID="run-pick-assets"
+          />
+          {pickAssetsResult ? (
+            <Text testID="pick-assets-result">{pickAssetsResult}</Text>
+          ) : null}
+        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
