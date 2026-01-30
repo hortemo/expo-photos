@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
 
   s.dependency 'ExpoModulesCore'
   s.dependency 'React-Core'
-  s.dependency 'SDWebImageWebPCoder', '0.15.0'
+  s.dependency 'SDWebImageWebPCoder', '~> 0.14'
 
   s.source_files = 'ios/**/*.{h,m,swift}'
   s.requires_arc = true
