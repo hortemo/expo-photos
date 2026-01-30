@@ -244,6 +244,7 @@ public final class ExpoPhotos: Module {
 
       try await withCheckedThrowingContinuation {
         (continuation: CheckedContinuation<Void, Error>) in
+        nonisolated(unsafe) let exportSession = exportSession
         exportSession.exportAsynchronously {
           switch exportSession.status {
           case .completed:
@@ -292,9 +293,11 @@ public final class ExpoPhotos: Module {
         return picker
       }
 
+      let pickerId = await MainActor.run { picker.id }
+
       return try await withCheckedThrowingContinuation {
         (continuation: CheckedContinuation<[[String: Any]], Error>) in
-        self.pickAssetsContinuations[picker.id] = continuation
+        self.pickAssetsContinuations[pickerId] = continuation
 
         Task {
           await viewController.present(picker, animated: true, completion: nil)

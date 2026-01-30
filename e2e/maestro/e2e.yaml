@@ -29,3 +29,17 @@ appId: com.hortemo.expoPhotosE2E
 - assertVisible:
     id: "test-status"
     text: "Status: success"
+
+# Test pickAssets - tap button, select a photo, tap Add, verify result
+- scrollUntilVisible:
+    element:
+      id: "run-pick-assets"
+    direction: DOWN
+- tapOn:
+    id: "run-pick-assets"
+- tapOn:
+    text: "Photo, .*"
+    index: 0
+- assertVisible:
+    id: "pick-assets-result"
+    text: "Picked 1 asset(s)"
