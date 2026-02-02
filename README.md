@@ -22,33 +22,48 @@ npm install @hortemo/expo-photos
 
 ### Components
 
-#### PHImage
+#### PHImageView
 
 A native image component that displays photos from the Photos library using `PHImageManager`.
 
 ```tsx
-import { PHImage, PHImageContentMode } from "@hortemo/expo-photos";
+import {
+  PHImageView,
+  PHImageContentMode,
+  PHImageRequestOptionsResizeMode,
+  PHImageRequestOptionsDeliveryMode,
+  UIViewContentMode,
+} from "@hortemo/expo-photos";
 
-<PHImage
+<PHImageView
   localIdentifier={asset.localIdentifier}
-  contentMode={PHImageContentMode.aspectFill}
-  resizeMode={PHImageRequestOptionsResizeMode.Fast}
-  deliveryMode={PHImageRequestOptionsDeliveryMode.HighQualityFormat}
+  contentMode={UIViewContentMode.scaleAspectFill}
+  requestOptions={{
+    contentMode: PHImageContentMode.aspectFit,
+    resizeMode: PHImageRequestOptionsResizeMode.fast,
+    deliveryMode: PHImageRequestOptionsDeliveryMode.highQualityFormat,
+    targetSize: { width: 300, height: 300 },
+    isNetworkAccessAllowed: true,
+  }}
+  onLoad={(event) => console.log(event.nativeEvent)}
+  onError={(event) => console.log(event.nativeEvent.message)}
   style={{ width: 300, height: 300 }}
 />
 ```
 
-#### PHVideo
+#### PHVideoView
 
 A video player component that streams videos from the library.
 
 ```tsx
-import { PHVideo, PHVideoRequestOptionsDeliveryMode } from "@hortemo/expo-photos";
+import { PHVideoView, PHVideoRequestOptionsDeliveryMode } from "@hortemo/expo-photos";
 
-<PHVideo
+<PHVideoView
   localIdentifier={asset.localIdentifier}
-  isNetworkAccessAllowed={true}
-  deliveryMode={PHVideoRequestOptionsDeliveryMode.Automatic}
+  requestOptions={{
+    isNetworkAccessAllowed: true,
+    deliveryMode: PHVideoRequestOptionsDeliveryMode.automatic,
+  }}
   onLoad={(event) => console.log(event.nativeEvent)}
   onError={(event) => console.log(event.nativeEvent.message)}
   style={{ width: 300, height: 200 }}

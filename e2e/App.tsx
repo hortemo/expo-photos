@@ -10,8 +10,9 @@ import ExpoPhotos, {
   PHImageContentMode,
   PHImageRequestOptionsDeliveryMode,
   PHImageRequestOptionsResizeMode,
-  PHImage,
-  PHVideo,
+  PHImageView,
+  PHVideoView,
+  UIViewContentMode,
 } from "@hortemo/expo-photos";
 
 type TestState = "idle" | "running" | "success" | "error";
@@ -85,7 +86,7 @@ function App(): JSX.Element {
       logProgress("fetch-images", "Fetching image assets from Photos...");
       const imageAssets = await ExpoPhotos.fetchAssets({
         fetchLimit: 5,
-        predicate: `mediaType == ${PHAssetMediaType.Image}`,
+        predicate: `mediaType == ${PHAssetMediaType.image}`,
       });
       logProgress(
         "image-count",
@@ -108,7 +109,7 @@ function App(): JSX.Element {
         localIdentifier: imageAsset.localIdentifier,
         targetSize: { width: 512, height: 512 },
         contentMode: PHImageContentMode.aspectFit,
-        deliveryMode: PHImageRequestOptionsDeliveryMode.HighQualityFormat,
+        deliveryMode: PHImageRequestOptionsDeliveryMode.highQualityFormat,
         encodeCompressionQuality: 0.8,
         outputURL: imageOutput.uri,
       });
@@ -135,7 +136,7 @@ function App(): JSX.Element {
         localIdentifier: imageAsset.localIdentifier,
         targetSize: "PHImageManagerMaximumSize",
         contentMode: PHImageContentMode.aspectFit,
-        deliveryMode: PHImageRequestOptionsDeliveryMode.HighQualityFormat,
+        deliveryMode: PHImageRequestOptionsDeliveryMode.highQualityFormat,
       });
       logProgress(
         "max-size-metadata",
@@ -145,7 +146,7 @@ function App(): JSX.Element {
       logProgress("fetch-videos", "Fetching video assets from Photos...");
       const videoAssets = await ExpoPhotos.fetchAssets({
         fetchLimit: 5,
-        predicate: `mediaType == ${PHAssetMediaType.Video}`,
+        predicate: `mediaType == ${PHAssetMediaType.video}`,
       });
       logProgress(
         "video-count",
@@ -240,12 +241,17 @@ function App(): JSX.Element {
         <View style={{ gap: 8 }}>
           <Text style={{ fontWeight: "600" }}>Image preview</Text>
           {imageAssetId ? (
-            <PHImage
+            <PHImageView
               testID="ph-image-preview"
               localIdentifier={imageAssetId}
-              contentMode={PHImageContentMode.aspectFill}
-              resizeMode={PHImageRequestOptionsResizeMode.Fast}
-              deliveryMode={PHImageRequestOptionsDeliveryMode.HighQualityFormat}
+              contentMode={UIViewContentMode.scaleAspectFill}
+              requestOptions={{
+                contentMode: PHImageContentMode.aspectFit,
+                resizeMode: PHImageRequestOptionsResizeMode.fast,
+                deliveryMode: PHImageRequestOptionsDeliveryMode.highQualityFormat,
+                targetSize: { width: 100, height: 100 },
+                isNetworkAccessAllowed: true,
+              }}
               onLoad={(event) => {
                 logProgress(
                   "image-loaded",
@@ -258,7 +264,7 @@ function App(): JSX.Element {
                   `Image error: ${event.nativeEvent.message}`,
                 );
               }}
-              style={{ width: 400, height: 400, backgroundColor: "green" }}
+              style={{ width: 300, height: 400, backgroundColor: "green" }}
             />
           ) : (
             <Text style={{ color: "#666" }}>
@@ -274,7 +280,7 @@ function App(): JSX.Element {
               testID="ph-video-preview"
               style={{ width: 400, height: 300, backgroundColor: "black" }}
             >
-              <PHVideo
+              <PHVideoView
                 localIdentifier={videoAssetId}
                 onLoad={(event) => {
                   logProgress(
