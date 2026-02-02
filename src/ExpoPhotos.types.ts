@@ -22,23 +22,23 @@ export enum PHAccessLevel {
 }
 
 export enum PHAssetMediaType {
-  Unknown = 0,
-  Image = 1,
-  Video = 2,
-  Audio = 3,
+  unknown = 0,
+  image = 1,
+  video = 2,
+  audio = 3,
 }
 
 export enum PHAssetMediaSubtype {
-  None = 0,
-  PhotoPanorama = 1 << 0,
-  PhotoHDR = 1 << 1,
-  PhotoScreenshot = 1 << 2,
-  PhotoLive = 1 << 3,
-  PhotoDepthEffect = 1 << 4,
-  VideoStreamed = 1 << 16,
-  VideoHighFrameRate = 1 << 17,
-  VideoTimelapse = 1 << 18,
-  VideoCinematic = 1 << 19,
+  none = 0,
+  photoPanorama = 1 << 0,
+  photoHDR = 1 << 1,
+  photoScreenshot = 1 << 2,
+  photoLive = 1 << 3,
+  photoDepthEffect = 1 << 4,
+  videoStreamed = 1 << 16,
+  videoHighFrameRate = 1 << 17,
+  videoTimelapse = 1 << 18,
+  videoCinematic = 1 << 19,
 }
 
 export interface NSSortDescriptor {
@@ -64,15 +64,15 @@ export type PHImageManagerMaximumSize = "PHImageManagerMaximumSize";
 export type RequestImageTargetSize = CGSize | PHImageManagerMaximumSize;
 
 export enum PHImageRequestOptionsResizeMode {
-  None = 0,
-  Fast = 1,
-  Exact = 2,
+  none = 0,
+  fast = 1,
+  exact = 2,
 }
 
 export enum PHImageRequestOptionsDeliveryMode {
-  Opportunistic = 0,
-  HighQualityFormat = 1,
-  FastFormat = 2,
+  opportunistic = 0,
+  highQualityFormat = 1,
+  fastFormat = 2,
 }
 
 export enum PHImageContentMode {
@@ -80,6 +80,21 @@ export enum PHImageContentMode {
   aspectFill = 1,
 }
 
+export enum UIViewContentMode {
+  scaleToFill = 0,
+  scaleAspectFit = 1,
+  scaleAspectFill = 2,
+  redraw = 3,
+  center = 4,
+  top = 5,
+  bottom = 6,
+  left = 7,
+  right = 8,
+  topLeft = 9,
+  topRight = 10,
+  bottomLeft = 11,
+  bottomRight = 12,
+}
 export interface PHImageRequestOptions {
   isNetworkAccessAllowed?: boolean;
   resizeMode?: PHImageRequestOptionsResizeMode;
@@ -92,10 +107,10 @@ export interface SDImageCoderOptions {
 }
 
 export enum PHVideoRequestOptionsDeliveryMode {
-  Automatic = 0,
-  HighQualityFormat = 1,
-  MediumQualityFormat = 2,
-  FastFormat = 3,
+  automatic = 0,
+  highQualityFormat = 1,
+  mediumQualityFormat = 2,
+  fastFormat = 3,
 }
 
 export interface PHVideoRequestOptions {
@@ -174,8 +189,7 @@ export interface AVAssetExportSessionOptions {
 }
 
 export interface RequestImageOptions
-  extends PHImageRequestOptions,
-    SDImageCoderOptions {
+  extends PHImageRequestOptions, SDImageCoderOptions {
   localIdentifier: string;
   targetSize: RequestImageTargetSize;
   contentMode: PHImageContentMode;
@@ -190,8 +204,7 @@ export interface RequestImageResult {
 }
 
 export interface RequestVideoOptions
-  extends PHVideoRequestOptions,
-    AVAssetExportSessionOptions {
+  extends PHVideoRequestOptions, AVAssetExportSessionOptions {
   localIdentifier: string;
   exportPreset: AVAssetExportPreset;
   timeout?: number;

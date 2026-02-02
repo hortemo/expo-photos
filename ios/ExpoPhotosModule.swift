@@ -322,8 +322,16 @@ public final class ExpoPhotos: Module {
         view.resizeMode = resizeMode ?? .none
       }
 
-      Prop("contentMode") { (view: PHImageView, contentMode: PHImageContentMode?) in
-        view.imageContentMode = contentMode ?? .aspectFill
+      Prop("requestContentMode") { (view: PHImageView, contentMode: PHImageContentMode?) in
+        view.requestContentMode = contentMode ?? .aspectFill
+      }
+
+      Prop("viewContentMode") { (view: PHImageView, contentMode: UIView.ContentMode?) in
+        view.viewContentMode = contentMode ?? .scaleAspectFill
+      }
+
+      Prop("targetSize") { (view: PHImageView, targetSize: TargetSize?) in
+        view.targetSize = targetSize?.value
       }
 
       Events("onLoad", "onError")
@@ -495,6 +503,8 @@ extension PHImageContentMode: @retroactive Convertible {}
 extension PHVideoRequestOptionsDeliveryMode: @retroactive Convertible {}
 extension AVFileType: @retroactive Convertible {}
 extension PHAccessLevel: @retroactive Convertible {}
+
+extension UIView.ContentMode: @retroactive Convertible {}
 
 extension PHPickerFilter: @retroactive Convertible {
   public static func convert(from value: Any?, appContext: AppContext) throws -> Self {

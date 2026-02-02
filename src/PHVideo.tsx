@@ -6,14 +6,23 @@ import {
   PHVideoRequestOptions,
 } from "./ExpoPhotos.types";
 
-export interface PHVideoProps extends ViewProps, PHVideoRequestOptions {
+export interface PHVideoViewRequestOptions extends PHVideoRequestOptions {}
+
+export interface PHVideoViewProps extends ViewProps {
   localIdentifier: string;
+  requestOptions?: PHVideoViewRequestOptions;
   onLoad?: (event: { nativeEvent: PHVideoLoadEvent }) => void;
   onError?: (event: { nativeEvent: PHVideoErrorEvent }) => void;
 }
 
 const NativePHVideoView = requireNativeViewManager("ExpoPhotos", "PHVideoView");
 
-export function PHVideo(props: PHVideoProps) {
-  return <NativePHVideoView {...props} />;
+export function PHVideoView({ requestOptions, ...rest }: PHVideoViewProps) {
+  return (
+    <NativePHVideoView
+      isNetworkAccessAllowed={requestOptions?.isNetworkAccessAllowed}
+      deliveryMode={requestOptions?.deliveryMode}
+      {...rest}
+    />
+  );
 }

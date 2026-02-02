@@ -2,8 +2,9 @@ import { requireNativeViewManager } from "expo-modules-core";
 import { ViewProps } from "react-native";
 import {
   PHImageContentMode,
-  PHImageRequestOptionsDeliveryMode,
-  PHImageRequestOptionsResizeMode,
+  PHImageRequestOptions,
+  RequestImageTargetSize,
+  UIViewContentMode,
 } from "./ExpoPhotos.types";
 
 export interface PHImageLoadEvent {
@@ -15,18 +16,35 @@ export interface PHImageErrorEvent {
   message: string;
 }
 
-export interface PHImageProps extends ViewProps {
-  localIdentifier: string;
-  isNetworkAccessAllowed?: boolean;
-  deliveryMode?: PHImageRequestOptionsDeliveryMode;
-  resizeMode?: PHImageRequestOptionsResizeMode;
+export interface PHImageViewRequestOptions extends PHImageRequestOptions {
   contentMode?: PHImageContentMode;
+  targetSize?: RequestImageTargetSize;
+}
+
+export interface PHImageViewProps extends ViewProps {
+  localIdentifier: string;
+  contentMode?: UIViewContentMode;
+  requestOptions?: PHImageViewRequestOptions;
   onLoad?: (event: { nativeEvent: PHImageLoadEvent }) => void;
   onError?: (event: { nativeEvent: PHImageErrorEvent }) => void;
 }
 
 const NativePHImageView = requireNativeViewManager("ExpoPhotos", "PHImageView");
 
-export function PHImage(props: PHImageProps) {
-  return <NativePHImageView {...props} />;
+export function PHImageView({
+  requestOptions,
+  contentMode,
+  ...rest
+}: PHImageViewProps) {
+  return (
+    <NativePHImageView
+      viewContentMode={contentMode}
+      requestContentMode={requestOptions?.contentMode}
+      isNetworkAccessAllowed={requestOptions?.isNetworkAccessAllowed}
+      deliveryMode={requestOptions?.deliveryMode}
+      resizeMode={requestOptions?.resizeMode}
+      targetSize={requestOptions?.targetSize}
+      {...rest}
+    />
+  );
 }

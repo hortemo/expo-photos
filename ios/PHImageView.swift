@@ -41,11 +41,26 @@ public final class PHImageView: ExpoView {
     }
   }
 
-  var imageContentMode: PHImageContentMode = .aspectFill {
+  var targetSize: CGSize? {
     didSet {
-      if imageContentMode != oldValue {
-        imageView.contentMode = imageContentMode == .aspectFit ? .scaleAspectFit : .scaleAspectFill
+      if targetSize != oldValue {
         loadImage()
+      }
+    }
+  }
+
+  var requestContentMode: PHImageContentMode = .aspectFill {
+    didSet {
+      if requestContentMode != oldValue {
+        loadImage()
+      }
+    }
+  }
+
+  var viewContentMode: UIView.ContentMode = .scaleAspectFill {
+    didSet {
+      if viewContentMode != oldValue {
+        imageView.contentMode = viewContentMode
       }
     }
   }
@@ -54,7 +69,7 @@ public final class PHImageView: ExpoView {
     imageView = UIImageView()
     super.init(appContext: appContext)
     imageView.clipsToBounds = true
-    imageView.contentMode = imageContentMode == .aspectFit ? .scaleAspectFit : .scaleAspectFill
+    imageView.contentMode = viewContentMode
     addSubview(imageView)
   }
 
@@ -88,12 +103,12 @@ public final class PHImageView: ExpoView {
     options.resizeMode = resizeMode
 
     let scale = window?.screen.scale ?? UIScreen.main.scale
-    let targetSize = CGSize(width: bounds.width * scale, height: bounds.height * scale)
+    let boundsSize = CGSize(width: bounds.width * scale, height: bounds.height * scale)
 
     currentRequestId = PHImageManager.default().requestImage(
       for: asset,
-      targetSize: targetSize,
-      contentMode: imageContentMode,
+      targetSize: targetSize ?? boundsSize,
+      contentMode: requestContentMode,
       options: options
     ) { [weak self] image, info in
       guard let self = self else { return }
