@@ -305,6 +305,30 @@ public final class ExpoPhotos: Module {
       }
     }
 
+    View(PHImageView.self) {
+      Prop("localIdentifier") { (view: PHImageView, localIdentifier: String?) in
+        view.localIdentifier = localIdentifier
+      }
+
+      Prop("isNetworkAccessAllowed") { (view: PHImageView, isNetworkAccessAllowed: Bool?) in
+        view.isNetworkAccessAllowed = isNetworkAccessAllowed ?? true
+      }
+
+      Prop("deliveryMode") { (view: PHImageView, deliveryMode: PHImageRequestOptionsDeliveryMode?) in
+        view.deliveryMode = deliveryMode ?? .opportunistic
+      }
+
+      Prop("resizeMode") { (view: PHImageView, resizeMode: PHImageRequestOptionsResizeMode?) in
+        view.resizeMode = resizeMode ?? .none
+      }
+
+      Prop("contentMode") { (view: PHImageView, contentMode: PHImageContentMode?) in
+        view.imageContentMode = contentMode ?? .aspectFill
+      }
+
+      Events("onLoad", "onError")
+    }
+
     View(PHVideoView.self) {
       Prop("localIdentifier") { (view: PHVideoView, localIdentifier: String?) in
         view.localIdentifier = localIdentifier

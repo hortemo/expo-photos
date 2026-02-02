@@ -1,6 +1,6 @@
 export { default } from "./ExpoPhotosModule";
 export * from "./ExpoPhotos.types";
-export { createPHImageSource } from "./PHImageSource";
-export type { PHImageSourceOptions } from "./PHImageSource";
+export { PHImage } from "./PHImage";
+export type { PHImageProps, PHImageLoadEvent, PHImageErrorEvent } from "./PHImage";
 export { PHVideo } from "./PHVideo";
 export type { PHVideoProps } from "./PHVideo";

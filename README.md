@@ -19,9 +19,24 @@ npm install @hortemo/expo-photos
 - `authorizationStatus(accessLevel: PHAccessLevel): Promise<PHAuthorizationStatus>`
 - `requestAuthorization(accessLevel: PHAccessLevel): Promise<PHAuthorizationStatus>`
 - `presentLimitedLibraryPicker(): Promise<void>`
-- `createPHImageSource(options: PHImageSourceOptions): ImageSourcePropType | undefined`
 
 ### Components
+
+#### PHImage
+
+A native image component that displays photos from the Photos library using `PHImageManager`.
+
+```tsx
+import { PHImage, PHImageContentMode } from "@hortemo/expo-photos";
+
+<PHImage
+  localIdentifier={asset.localIdentifier}
+  contentMode={PHImageContentMode.aspectFill}
+  resizeMode={PHImageRequestOptionsResizeMode.Fast}
+  deliveryMode={PHImageRequestOptionsDeliveryMode.HighQualityFormat}
+  style={{ width: 300, height: 300 }}
+/>
+```
 
 #### PHVideo
 

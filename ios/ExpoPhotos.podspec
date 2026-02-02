@@ -14,11 +14,10 @@ Pod::Spec.new do |s|
   s.swift_version = '5.9'
   s.source       = { git: package['repository'] || 'https://github.com/hortemo/expo-photos' }
   s.static_framework = true
+  s.frameworks     = 'Photos','PhotosUI'
 
   s.dependency 'ExpoModulesCore'
-  s.dependency 'React-Core'
   s.dependency 'SDWebImageWebPCoder', '~> 0.14'
 
   s.source_files = '**/*.{h,m,swift}'
-  s.requires_arc = true
 end

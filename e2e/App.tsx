@@ -1,12 +1,5 @@
 import React, { JSX, useCallback, useState } from "react";
-import {
-  Button,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { Button, SafeAreaView, ScrollView, Text, View } from "react-native";
 import * as FileSystem from "expo-file-system";
 import ExpoPhotos, {
   AVAssetExportPreset,
@@ -17,7 +10,7 @@ import ExpoPhotos, {
   PHImageContentMode,
   PHImageRequestOptionsDeliveryMode,
   PHImageRequestOptionsResizeMode,
-  createPHImageSource,
+  PHImage,
   PHVideo,
 } from "@hortemo/expo-photos";
 
@@ -67,26 +60,26 @@ function App(): JSX.Element {
 
     try {
       const statusBefore = await ExpoPhotos.authorizationStatus(
-        PHAccessLevel.readWrite
+        PHAccessLevel.readWrite,
       );
       logProgress(
         "authorization-status-before",
-        `Authorization status before request: ${PHAuthorizationStatus[statusBefore]}`
+        `Authorization status before request: ${PHAuthorizationStatus[statusBefore]}`,
       );
 
       logProgress(
         "request-permission",
-        "Requesting photo library permission..."
+        "Requesting photo library permission...",
       );
       const status = await ExpoPhotos.requestAuthorization(
-        PHAccessLevel.readWrite
+        PHAccessLevel.readWrite,
       );
       if (status !== PHAuthorizationStatus.authorized) {
         throw new Error("Photo library access not granted");
       }
       logProgress(
         "authorization-status-after",
-        `Authorization status after request: ${PHAuthorizationStatus[status]}`
+        `Authorization status after request: ${PHAuthorizationStatus[status]}`,
       );
 
       logProgress("fetch-images", "Fetching image assets from Photos...");
@@ -96,7 +89,7 @@ function App(): JSX.Element {
       });
       logProgress(
         "image-count",
-        `Fetched ${imageAssets.length} image asset(s).`
+        `Fetched ${imageAssets.length} image asset(s).`,
       );
 
       const imageAsset = imageAssets[0];
@@ -122,7 +115,7 @@ function App(): JSX.Element {
 
       logProgress(
         "image-metadata",
-        `Image metadata: size=${imageResult.size.width}x${imageResult.size.height}, scale=${imageResult.scale}, orientation=${imageResult.imageOrientation}`
+        `Image metadata: size=${imageResult.size.width}x${imageResult.size.height}, scale=${imageResult.scale}, orientation=${imageResult.imageOrientation}`,
       );
 
       const imageInfo = imageOutput.info();
@@ -131,12 +124,12 @@ function App(): JSX.Element {
       }
       logProgress(
         "image-exported",
-        `Image exported (${Math.round((imageInfo.size ?? 0) / 1024)} KB).`
+        `Image exported (${Math.round((imageInfo.size ?? 0) / 1024)} KB).`,
       );
 
       logProgress(
         "test-max-size",
-        "Testing requestImage with PHImageManagerMaximumSize..."
+        "Testing requestImage with PHImageManagerMaximumSize...",
       );
       const maxSizeResult = await ExpoPhotos.requestImage({
         localIdentifier: imageAsset.localIdentifier,
@@ -146,7 +139,7 @@ function App(): JSX.Element {
       });
       logProgress(
         "max-size-metadata",
-        `Max size metadata: size=${maxSizeResult.size.width}x${maxSizeResult.size.height}, scale=${maxSizeResult.scale}`
+        `Max size metadata: size=${maxSizeResult.size.width}x${maxSizeResult.size.height}, scale=${maxSizeResult.scale}`,
       );
 
       logProgress("fetch-videos", "Fetching video assets from Photos...");
@@ -156,7 +149,7 @@ function App(): JSX.Element {
       });
       logProgress(
         "video-count",
-        `Fetched ${videoAssets.length} video asset(s).`
+        `Fetched ${videoAssets.length} video asset(s).`,
       );
 
       const videoAsset = videoAssets[0];
@@ -172,7 +165,7 @@ function App(): JSX.Element {
 
       logProgress(
         "export-video",
-        `Exporting video ${videoAsset.localIdentifier}...`
+        `Exporting video ${videoAsset.localIdentifier}...`,
       );
       await ExpoPhotos.requestVideo({
         localIdentifier: videoAsset.localIdentifier,
@@ -187,7 +180,7 @@ function App(): JSX.Element {
       }
       logProgress(
         "video-exported",
-        `Video exported (${Math.round((videoInfo.size ?? 0) / 1024)} KB).`
+        `Video exported (${Math.round((videoInfo.size ?? 0) / 1024)} KB).`,
       );
 
       setStatus((prev) => ({
@@ -247,18 +240,25 @@ function App(): JSX.Element {
         <View style={{ gap: 8 }}>
           <Text style={{ fontWeight: "600" }}>Image preview</Text>
           {imageAssetId ? (
-            <Image
+            <PHImage
               testID="ph-image-preview"
-              style={{ width: 400, height: 200, backgroundColor: "green" }}
-              resizeMode="contain"
-              source={createPHImageSource({
-                localIdentifier: imageAssetId,
-                targetSize: { width: 4000, height: 2000 },
-                resizeMode: PHImageRequestOptionsResizeMode.Fast,
-                contentMode: PHImageContentMode.aspectFill,
-                deliveryMode:
-                  PHImageRequestOptionsDeliveryMode.HighQualityFormat,
-              })}
+              localIdentifier={imageAssetId}
+              contentMode={PHImageContentMode.aspectFill}
+              resizeMode={PHImageRequestOptionsResizeMode.Fast}
+              deliveryMode={PHImageRequestOptionsDeliveryMode.HighQualityFormat}
+              onLoad={(event) => {
+                logProgress(
+                  "image-loaded",
+                  `Image loaded: size=${event.nativeEvent.size.width}x${event.nativeEvent.size.height}, scale=${event.nativeEvent.scale}`,
+                );
+              }}
+              onError={(event) => {
+                logProgress(
+                  "image-error",
+                  `Image error: ${event.nativeEvent.message}`,
+                );
+              }}
+              style={{ width: 400, height: 400, backgroundColor: "green" }}
             />
           ) : (
             <Text style={{ color: "#666" }}>
@@ -279,11 +279,14 @@ function App(): JSX.Element {
                 onLoad={(event) => {
                   logProgress(
                     "video-loaded",
-                    `Video loaded: duration=${event.nativeEvent.duration}ms, size=${event.nativeEvent.naturalSize.width}x${event.nativeEvent.naturalSize.height}`
+                    `Video loaded: duration=${event.nativeEvent.duration}ms, size=${event.nativeEvent.naturalSize.width}x${event.nativeEvent.naturalSize.height}`,
                   );
                 }}
                 onError={(event) => {
-                  logProgress("video-error", `Video error: ${event.nativeEvent.message}`);
+                  logProgress(
+                    "video-error",
+                    `Video error: ${event.nativeEvent.message}`,
+                  );
                 }}
                 style={{ width: "100%", height: "100%" }}
               />
@@ -312,7 +315,6 @@ function App(): JSX.Element {
             <Text testID="pick-assets-result">{pickAssetsResult}</Text>
           ) : null}
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );
