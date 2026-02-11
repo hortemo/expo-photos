@@ -264,43 +264,37 @@ public final class ExpoPhotos: Module {
     }
 
     AsyncFunction("presentLimitedLibraryPicker") { () async throws -> Void in
-      guard let viewController = self.appContext?.utilities?.currentViewController() else {
-        throw ExpoPhotosError.noViewController
+      try await MainActor.run {
+        guard let viewController = self.appContext?.utilities?.currentViewController() else {
+          throw ExpoPhotosError.noViewController
+        }
+        PHPhotoLibrary.shared().presentLimitedLibraryPicker(from: viewController)
       }
-
-      await PHPhotoLibrary.shared().presentLimitedLibraryPicker(from: viewController)
     }
 
     AsyncFunction("pickAssets") { (options: PickAssetsOptions) async throws -> [[String: Any]] in
-      guard let viewController = self.appContext?.utilities?.currentViewController() else {
-        throw ExpoPhotosError.noViewController
-      }
+      return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[[String: Any]], Error>) in
+        Task { @MainActor in
+          guard let viewController = self.appContext?.utilities?.currentViewController() else {
+            continuation.resume(throwing: ExpoPhotosError.noViewController)
+            return
+          }
 
-      let picker: PHPickerViewController = await MainActor.run {
-        var config = PHPickerConfiguration(photoLibrary: .shared())
+          var config = PHPickerConfiguration(photoLibrary: .shared())
+          
+          if let selectionLimit = options.selectionLimit {
+            config.selectionLimit = selectionLimit
+          }
+          
+          if let filter = options.filter {
+            config.filter = filter
+          }
 
-        if let selectionLimit = options.selectionLimit {
-          config.selectionLimit = selectionLimit
-        }
+          let picker = PHPickerViewController(configuration: config)
+          picker.delegate = self
 
-        if let filter = options.filter {
-          config.filter = filter
-        }
-
-        let picker = PHPickerViewController(configuration: config)
-        picker.delegate = self
-
-        return picker
-      }
-
-      let pickerId = await MainActor.run { picker.id }
-
-      return try await withCheckedThrowingContinuation {
-        (continuation: CheckedContinuation<[[String: Any]], Error>) in
-        self.pickAssetsContinuations[pickerId] = continuation
-
-        Task {
-          await viewController.present(picker, animated: true, completion: nil)
+          self.pickAssetsContinuations[picker.id] = continuation
+          viewController.present(picker, animated: true)
         }
       }
     }
