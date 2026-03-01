@@ -292,7 +292,9 @@ public final class ExpoPhotos: Module {
 
           let picker = PHPickerViewController(configuration: config)
           picker.delegate = self
-          picker.presentationController?.delegate = self
+
+          // Disable swipe to dismiss, which does not trigger delegate
+          picker.isModalInPresentation = true
 
           self.pickAssetsContinuations[picker.id] = continuation
           viewController.present(picker, animated: true)
@@ -350,19 +352,7 @@ public final class ExpoPhotos: Module {
   }
 }
 
-extension ExpoPhotos: PHPickerViewControllerDelegate, UIAdaptivePresentationControllerDelegate {
-  public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-    guard let picker = presentationController.presentedViewController as? PHPickerViewController else {
-      return
-    }
-
-    guard let continuation = self.pickAssetsContinuations.removeValue(forKey: picker.id) else {
-      return
-    }
-
-    continuation.resume(returning: [])
-  }
-
+extension ExpoPhotos: PHPickerViewControllerDelegate {
   public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
     picker.dismiss(animated: true, completion: nil)
 
