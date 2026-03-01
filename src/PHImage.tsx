@@ -1,5 +1,5 @@
 import { requireNativeViewManager } from "expo-modules-core";
-import { ViewProps } from "react-native";
+import type { ViewProps } from "react-native";
 import {
   PHImageContentMode,
   PHImageRequestOptions,
