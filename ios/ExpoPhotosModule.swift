@@ -292,6 +292,7 @@ public final class ExpoPhotos: Module {
 
           let picker = PHPickerViewController(configuration: config)
           picker.delegate = self
+          picker.presentationController?.delegate = self
 
           self.pickAssetsContinuations[picker.id] = continuation
           viewController.present(picker, animated: true)
@@ -349,15 +350,25 @@ public final class ExpoPhotos: Module {
   }
 }
 
-extension ExpoPhotos: PHPickerViewControllerDelegate {
-  public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-    picker.dismiss(animated: true, completion: nil)
-
-    guard let continuation = self.pickAssetsContinuations[picker.id] else {
+extension ExpoPhotos: PHPickerViewControllerDelegate, UIAdaptivePresentationControllerDelegate {
+  public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+    guard let picker = presentationController.presentedViewController as? PHPickerViewController else {
       return
     }
 
-    self.pickAssetsContinuations.removeValue(forKey: picker.id)
+    guard let continuation = self.pickAssetsContinuations.removeValue(forKey: picker.id) else {
+      return
+    }
+
+    continuation.resume(returning: [])
+  }
+
+  public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+    picker.dismiss(animated: true, completion: nil)
+
+    guard let continuation = self.pickAssetsContinuations.removeValue(forKey: picker.id) else {
+      return
+    }
 
     let assetIdentifiers = results.compactMap { $0.assetIdentifier }
     var assets: [[String: Any]] = []
