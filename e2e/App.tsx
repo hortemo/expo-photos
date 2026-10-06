@@ -159,6 +159,11 @@ function App(): JSX.Element {
       }
       setVideoAssetId(videoAsset.localIdentifier);
 
+      // The fixture video is 0.503 s long
+      if (videoAsset.duration !== 503) {
+        throw new Error(`Unexpected video duration: ${videoAsset.duration}`);
+      }
+
       const videoOutput = ensureWritableFile("expo-photos-e2e.mov");
       if (videoOutput.exists) {
         videoOutput.delete();
@@ -168,13 +173,13 @@ function App(): JSX.Element {
         "export-video",
         `Exporting video ${videoAsset.localIdentifier}...`,
       );
-      await ExpoPhotos.requestVideo({
+      const videoRequest = {
         localIdentifier: videoAsset.localIdentifier,
         exportPreset: AVAssetExportPreset.MediumQuality,
         outputFileType: AVFileType.mov,
         outputURL: videoOutput.uri,
-        timeout: 20_000,
-      });
+      };
+      await ExpoPhotos.requestVideo({ ...videoRequest, timeout: 20_000 });
       const videoInfo = videoOutput.info();
       if (!videoInfo.exists || (videoInfo.size ?? 0) === 0) {
         throw new Error("Video export failed (file missing or empty)");
@@ -183,6 +188,24 @@ function App(): JSX.Element {
         "video-exported",
         `Video exported (${Math.round((videoInfo.size ?? 0) / 1024)} KB).`,
       );
+
+      logProgress(
+        "export-video-timeout",
+        "Exporting video with 1 ms timeout...",
+      );
+      // Same export as above to a clean path, so only the timeout can fail it
+      videoOutput.delete();
+      const timedOut = await ExpoPhotos.requestVideo({
+        ...videoRequest,
+        timeout: 1,
+      }).then(
+        () => false,
+        () => true,
+      );
+      if (!timedOut) {
+        throw new Error("Video export ignored its 1 ms timeout");
+      }
+      logProgress("video-timed-out", "Video export timed out.");
 
       setStatus((prev) => ({
         ...prev,

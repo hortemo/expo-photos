@@ -1,8 +1,10 @@
 export interface PHAsset {
   localIdentifier: string;
+  /** Milliseconds since 1970. */
   creationDate: number;
   mediaType: PHAssetMediaType;
   mediaSubtypes: PHAssetMediaSubtype;
+  /** Milliseconds. */
   duration: number;
   pixelWidth: number;
   pixelHeight: number;
@@ -119,7 +121,9 @@ export interface PHVideoRequestOptions {
 }
 
 export interface CMTimeRange {
+  /** Milliseconds. */
   start: number;
+  /** Milliseconds. */
   duration: number;
 }
 
@@ -194,6 +198,7 @@ export interface RequestImageOptions
   targetSize: RequestImageTargetSize;
   contentMode: PHImageContentMode;
   outputURL?: string;
+  /** Milliseconds until the request is cancelled. */
   timeout?: number;
 }
 
@@ -207,6 +212,7 @@ export interface RequestVideoOptions
   extends PHVideoRequestOptions, AVAssetExportSessionOptions {
   localIdentifier: string;
   exportPreset: AVAssetExportPreset;
+  /** Milliseconds until the request is cancelled. */
   timeout?: number;
 }
 
@@ -222,6 +228,7 @@ export interface PickAssetsOptions {
 }
 
 export interface PHVideoLoadEvent {
+  /** Milliseconds. */
   duration: number;
   naturalSize: { width: number; height: number };
 }

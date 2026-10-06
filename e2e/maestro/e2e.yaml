@@ -27,6 +27,10 @@ appId: com.hortemo.expoPhotosE2E
 - assertVisible:
     id: "test-progress-video-exported"
 - assertVisible:
+    id: "test-progress-export-video-timeout"
+- assertVisible:
+    id: "test-progress-video-timed-out"
+- assertVisible:
     id: "test-status"
     text: "Status: success"
 

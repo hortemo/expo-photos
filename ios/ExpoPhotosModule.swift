@@ -21,7 +21,7 @@ struct RequestImageOptions: Record {
   @Field var outputURL: URL?
   @Field var encodeCompressionQuality: Double?
   @Field var encodeMaxFileSize: Int?
-  @Field var timeout: TimeInterval?
+  @Field var timeout: Milliseconds?
 }
 
 protocol AVAssetExportSessionOptions {
@@ -40,7 +40,7 @@ struct RequestVideoOptions: Record, AVAssetExportSessionOptions {
   @Field var outputFileType: AVFileType?
   @Field var fileLengthLimit: Int64?
   @Field var timeRange: CMTimeRange?
-  @Field var timeout: TimeInterval?
+  @Field var timeout: Milliseconds?
 }
 
 struct PickAssetsOptions: Record {
@@ -123,7 +123,7 @@ public final class ExpoPhotos: Module {
         imageRequestOptions.resizeMode = resizeMode
       }
 
-      let deadline = options.timeout.map { DispatchTime.now() + $0 }
+      let deadline = options.timeout.map { DispatchTime.now() + $0.seconds }
 
       let image = try await withCheckedThrowingContinuation {
         (continuation: CheckedContinuation<UIImage, Error>) in
@@ -202,7 +202,7 @@ public final class ExpoPhotos: Module {
         videoRequestOptions.deliveryMode = deliveryMode
       }
 
-      let deadline = options.timeout.map { DispatchTime.now() + $0 }
+      let deadline = options.timeout.map { DispatchTime.now() + $0.seconds }
 
       let exportSession = try await withCheckedThrowingContinuation {
         (continuation: CheckedContinuation<AVAssetExportSession, Error>) in
@@ -377,22 +377,19 @@ extension PHPickerViewController {
   }
 }
 
-extension TimeInterval: @retroactive Convertible {
-  public static func convert(from value: Any?, appContext: AppContext) throws -> Self {
-    guard let milliseconds = value as? Int else {
+/// A duration or timestamp that JS represents in milliseconds.
+struct Milliseconds: Convertible {
+  let seconds: TimeInterval
+
+  static func convert(from value: Any?, appContext: AppContext) throws -> Self {
+    guard let milliseconds = value as? Double, milliseconds.isFinite else {
       throw Conversions.ConvertingException<Self>(value)
     }
-    return Double(milliseconds) / 1000
+    return Self(seconds: milliseconds / 1000)
   }
 
-  func toJS() -> Int {
-    return Int(self * 1000)
-  }
-}
-
-extension CMTime {
-  func toJS() -> Int {
-    return Int(self.seconds * 1000)
+  static func toJS(_ seconds: TimeInterval) -> Int {
+    seconds.isFinite ? Int((seconds * 1000).rounded()) : 0
   }
 }
 
@@ -404,10 +401,10 @@ extension PHAsset {
   func toJS() -> [String: Any] {
     return [
       "localIdentifier": localIdentifier,
-      "creationDate": creationDate?.timeIntervalSince1970.toJS() ?? NSNull(),
+      "creationDate": creationDate.map { Milliseconds.toJS($0.timeIntervalSince1970) } ?? NSNull(),
       "mediaType": mediaType.rawValue,
       "mediaSubtypes": mediaSubtypes.rawValue,
-      "duration": duration.toJS(),
+      "duration": Milliseconds.toJS(duration),
       "pixelWidth": pixelWidth,
       "pixelHeight": pixelHeight,
     ]
@@ -441,16 +438,14 @@ extension NSPredicate: @retroactive Convertible {
 
 extension CMTimeRange: @retroactive Convertible {
   public static func convert(from value: Any?, appContext: AppContext) throws -> Self {
-    guard let dict = value as? [String: Any],
-      let startMs = dict["start"] as? Int,
-      let durationMs = dict["duration"] as? Int
-    else {
-      throw Conversions.ConvertingException<CMTimeRange>(value)
+    guard let dict = value as? [String: Any] else {
+      throw Conversions.ConvertingException<Self>(value)
     }
-
+    let start = try Milliseconds.convert(from: dict["start"], appContext: appContext)
+    let duration = try Milliseconds.convert(from: dict["duration"], appContext: appContext)
     return Self(
-      start: CMTimeMakeWithSeconds(Double(startMs) / 1000, preferredTimescale: 600),
-      duration: CMTimeMakeWithSeconds(Double(durationMs) / 1000, preferredTimescale: 600)
+      start: CMTime(seconds: start.seconds, preferredTimescale: 600),
+      duration: CMTime(seconds: duration.seconds, preferredTimescale: 600)
     )
   }
 }
