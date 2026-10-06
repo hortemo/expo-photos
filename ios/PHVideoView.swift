@@ -122,11 +122,10 @@ public final class PHVideoView: ExpoView {
         case .readyToPlay:
           if !self.didSendLoadEvent {
             self.didSendLoadEvent = true
-            let duration = playerItem.asset.duration.seconds.isFinite ? playerItem.asset.duration.seconds * 1000 : 0
             let tracks = playerItem.asset.tracks(withMediaType: .video)
             let size = tracks.first?.naturalSize ?? .zero
             self.onLoad([
-              "duration": duration,
+              "duration": Milliseconds.toJS(playerItem.asset.duration.seconds),
               "naturalSize": [
                 "width": size.width,
                 "height": size.height
