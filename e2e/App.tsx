@@ -45,6 +45,9 @@ function App(): JSX.Element {
   const [imageAssetId, setImageAssetId] = useState<string | null>(null);
   const [videoAssetId, setVideoAssetId] = useState<string | null>(null);
   const [pickAssetsResult, setPickAssetsResult] = useState<string | null>(null);
+  const [limitedPickerResult, setLimitedPickerResult] = useState<string | null>(
+    null,
+  );
 
   const logProgress = useCallback((id: string, message: string) => {
     console.log(message);
@@ -104,7 +107,7 @@ function App(): JSX.Element {
         imageOutput.delete();
       }
 
-      logProgress("export-image", `Exporting image to ${imageOutput.uri}...`);
+      logProgress("export-image", "Exporting image...");
       const imageResult = await ExpoPhotos.requestImage({
         localIdentifier: imageAsset.localIdentifier,
         targetSize: { width: 512, height: 512 },
@@ -169,10 +172,7 @@ function App(): JSX.Element {
         videoOutput.delete();
       }
 
-      logProgress(
-        "export-video",
-        `Exporting video ${videoAsset.localIdentifier}...`,
-      );
+      logProgress("export-video", "Exporting video...");
       const videoRequest = {
         localIdentifier: videoAsset.localIdentifier,
         exportPreset: AVAssetExportPreset.MediumQuality,
@@ -231,6 +231,19 @@ function App(): JSX.Element {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setPickAssetsResult(`Error: ${message}`);
+    }
+  }, []);
+
+  const runLimitedPicker = useCallback(async () => {
+    try {
+      setLimitedPickerResult(null);
+      const localIdentifiers = await ExpoPhotos.presentLimitedLibraryPicker();
+      setLimitedPickerResult(
+        `Limited picker closed with ${localIdentifiers.length} new asset(s)`,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setLimitedPickerResult(`Error: ${message}`);
     }
   }, []);
 
@@ -342,6 +355,17 @@ function App(): JSX.Element {
           />
           {pickAssetsResult ? (
             <Text testID="pick-assets-result">{pickAssetsResult}</Text>
+          ) : null}
+        </View>
+
+        <View style={{ gap: 8 }}>
+          <Button
+            title="Test presentLimitedLibraryPicker"
+            onPress={runLimitedPicker}
+            testID="run-limited-picker"
+          />
+          {limitedPickerResult ? (
+            <Text testID="limited-picker-result">{limitedPickerResult}</Text>
           ) : null}
         </View>
       </ScrollView>

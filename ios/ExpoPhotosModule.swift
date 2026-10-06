@@ -263,12 +263,22 @@ public final class ExpoPhotos: Module {
       }
     }
 
-    AsyncFunction("presentLimitedLibraryPicker") { () async throws -> Void in
-      try await MainActor.run {
-        guard let viewController = self.appContext?.utilities?.currentViewController() else {
-          throw ExpoPhotosError.noViewController
+    AsyncFunction("presentLimitedLibraryPicker") { () async throws -> [String] in
+      // Without limited access, the picker neither shows nor completes
+      guard PHPhotoLibrary.authorizationStatus(for: .readWrite) == .limited else {
+        return []
+      }
+
+      return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[String], Error>) in
+        Task { @MainActor in
+          guard let viewController = self.appContext?.utilities?.currentViewController() else {
+            continuation.resume(throwing: ExpoPhotosError.noViewController)
+            return
+          }
+          PHPhotoLibrary.shared().presentLimitedLibraryPicker(from: viewController) { localIdentifiers in
+            continuation.resume(returning: localIdentifiers)
+          }
         }
-        PHPhotoLibrary.shared().presentLimitedLibraryPicker(from: viewController)
       }
     }
 

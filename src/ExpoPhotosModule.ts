@@ -17,7 +17,8 @@ export declare class ExpoPhotosModule extends NativeModule {
   pickAssets(options: PickAssetsOptions): Promise<PHAsset[]>;
   authorizationStatus(accessLevel: PHAccessLevel): Promise<PHAuthorizationStatus>;
   requestAuthorization(accessLevel: PHAccessLevel): Promise<PHAuthorizationStatus>;
-  presentLimitedLibraryPicker(): Promise<void>;
+  /** Resolves with newly selected local identifiers once the picker closes. */
+  presentLimitedLibraryPicker(): Promise<string[]>;
 }
 
 export default requireNativeModule<ExpoPhotosModule>("ExpoPhotos");
