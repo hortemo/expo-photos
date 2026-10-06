@@ -104,7 +104,7 @@ function App(): JSX.Element {
         imageOutput.delete();
       }
 
-      logProgress("export-image", `Exporting image to ${imageOutput.uri}...`);
+      logProgress("export-image", "Exporting image...");
       const imageResult = await ExpoPhotos.requestImage({
         localIdentifier: imageAsset.localIdentifier,
         targetSize: { width: 512, height: 512 },
@@ -169,10 +169,7 @@ function App(): JSX.Element {
         videoOutput.delete();
       }
 
-      logProgress(
-        "export-video",
-        `Exporting video ${videoAsset.localIdentifier}...`,
-      );
+      logProgress("export-video", "Exporting video...");
       const videoRequest = {
         localIdentifier: videoAsset.localIdentifier,
         exportPreset: AVAssetExportPreset.MediumQuality,
