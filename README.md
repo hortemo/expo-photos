@@ -18,7 +18,7 @@ npm install @hortemo/expo-photos
 - `pickAssets(options: PickAssetsOptions): Promise<PHAsset[]>`
 - `authorizationStatus(accessLevel: PHAccessLevel): Promise<PHAuthorizationStatus>`
 - `requestAuthorization(accessLevel: PHAccessLevel): Promise<PHAuthorizationStatus>`
-- `presentLimitedLibraryPicker(): Promise<void>`
+- `presentLimitedLibraryPicker(): Promise<string[]>`
 
 ### Components
 

@@ -45,6 +45,9 @@ function App(): JSX.Element {
   const [imageAssetId, setImageAssetId] = useState<string | null>(null);
   const [videoAssetId, setVideoAssetId] = useState<string | null>(null);
   const [pickAssetsResult, setPickAssetsResult] = useState<string | null>(null);
+  const [limitedPickerResult, setLimitedPickerResult] = useState<string | null>(
+    null,
+  );
 
   const logProgress = useCallback((id: string, message: string) => {
     console.log(message);
@@ -231,6 +234,19 @@ function App(): JSX.Element {
     }
   }, []);
 
+  const runLimitedPicker = useCallback(async () => {
+    try {
+      setLimitedPickerResult(null);
+      const localIdentifiers = await ExpoPhotos.presentLimitedLibraryPicker();
+      setLimitedPickerResult(
+        `Limited picker closed with ${localIdentifiers.length} new asset(s)`,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setLimitedPickerResult(`Error: ${message}`);
+    }
+  }, []);
+
   const isRunning = status.state === "running";
 
   return (
@@ -339,6 +355,17 @@ function App(): JSX.Element {
           />
           {pickAssetsResult ? (
             <Text testID="pick-assets-result">{pickAssetsResult}</Text>
+          ) : null}
+        </View>
+
+        <View style={{ gap: 8 }}>
+          <Button
+            title="Test presentLimitedLibraryPicker"
+            onPress={runLimitedPicker}
+            testID="run-limited-picker"
+          />
+          {limitedPickerResult ? (
+            <Text testID="limited-picker-result">{limitedPickerResult}</Text>
           ) : null}
         </View>
       </ScrollView>
