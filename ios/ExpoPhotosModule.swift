@@ -476,7 +476,8 @@ struct TargetSize: Convertible {
 extension Convertible where Self: RawRepresentable, Self.RawValue == Int {
   public static func convert(from value: Any?, appContext: AppContext) throws -> Self {
     guard
-      let rawValue = value as? Int,
+      let number = value as? Double,
+      let rawValue = Int(exactly: number),
       let enumValue = Self(rawValue: rawValue)
     else {
       throw Conversions.ConvertingException<Self>(value)
